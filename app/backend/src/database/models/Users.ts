@@ -1,6 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import db from '.';
-
+// Boa pratica a model no singular e a migration no Plural 
 class User extends Model {
   public id!: number;
   public username: string;
