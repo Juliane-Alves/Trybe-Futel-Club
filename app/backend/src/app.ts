@@ -1,4 +1,5 @@
 import * as express from 'express';
+import * as cors from 'cors';
 import RouteLogin from './routes/rotaLogin';
 import Error from './Middlewares/erroMiddleware';
 
@@ -27,6 +28,12 @@ class App {
 
     this.app.use(express.json());
     this.app.use(accessControl);
+
+
+    this.app.use(cors());
+    this.app.use('/login', RouteLogin);
+    this.app.use(Error.middlewareError);
+
   }
 
   public start(PORT: string | number):void {
