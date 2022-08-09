@@ -6,7 +6,9 @@ class userLoginController {
         try {
 
           const { email, password } = req.body;
+
           const getUser = await UserLoginService.dataUserLogin(email, password);
+          
           return res.status(200).json(getUser);
           
         } catch (error) {

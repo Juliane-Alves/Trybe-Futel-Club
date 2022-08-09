@@ -5,8 +5,8 @@ import userLoginController from '../controllers/userLoginController'
 const RouteLogin = Router()
 
 RouteLogin.post('/', 
-validateLoginEmail, 
-validateLoginPassword, 
+ validateLoginEmail,
+ validateLoginPassword,
  userLoginController.dataUserLogin);
 
 export default RouteLogin;
