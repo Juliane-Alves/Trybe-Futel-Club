@@ -15,7 +15,7 @@ class App {
     this.app.get('/', (req, res) => res.json({ ok: true }));
 
     this.app.use('/login', RouteLogin);
-    // this.app.use('/login/validate');
+    this.app.use('/login/validate', RouteLogin);
     this.app.use(Error.middlewareError)
   }
 
@@ -33,6 +33,7 @@ class App {
 
     this.app.use(cors());
     this.app.use('/login', RouteLogin);
+    this.app.use('/login/validate', RouteLogin);
     this.app.use(Error.middlewareError);
 
   }

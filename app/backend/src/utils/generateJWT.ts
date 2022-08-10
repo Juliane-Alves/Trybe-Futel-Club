@@ -17,11 +17,11 @@ class JwToken {
 
    }
 
-// validação para o role
- /* public validateJWT(token: string): jwt.JwtPayload {
+
+  public validateJWT(token: string): jwt.JwtPayload {
     const payloadData = jwt.verify(token, this.secretKey);
     return payloadData as jwt.JwtPayload;
-  } */
+  }
 
 }
 

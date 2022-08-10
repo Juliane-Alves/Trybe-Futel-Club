@@ -6,6 +6,7 @@ import JwToken from '../utils/generateJWT';
 
 const tokenG = new JwToken()
 const loginInvalid = { status: 401, message: 'Incorrect email or password' };
+const erroLoginProceed= { status: 401, message: 'login required to proceed' };
 
 class UserLoginService {
     public static async  dataUserLogin(email: string, password: string): Promise<ILogin> {
@@ -25,6 +26,15 @@ class UserLoginService {
 
     
     }
+
+    public static  userLoginValidateJWT(token: string) {
+
+        if (!token) throw erroLoginProceed
+
+        const payloadData= tokenG.validateJWT(token);
+        
+        return { role: payloadData.data.role };
+      }
    // const dataUser = await User.findOne({ where: { email }})
 
 }
