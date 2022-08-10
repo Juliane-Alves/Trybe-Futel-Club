@@ -9,4 +9,6 @@ RouteLogin.post('/',
  validateLoginPassword,
  userLoginController.dataUserLogin);
 
+ // RouteLogin.get('/') 
+
 export default RouteLogin;

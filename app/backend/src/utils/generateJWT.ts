@@ -1,5 +1,5 @@
 import * as jwt from 'jsonwebtoken';
-import { IUser } from '../interfaces/index'
+import { IUser } from '../interfaces/index';
 import 'dotenv/config';
 
 
@@ -16,6 +16,12 @@ class JwToken {
        return token; 
 
    }
+
+// validação para o role
+ /* public validateJWT(token: string): jwt.JwtPayload {
+    const payloadData = jwt.verify(token, this.secretKey);
+    return payloadData as jwt.JwtPayload;
+  } */
 
 }
 
