@@ -12,3 +12,8 @@
      status?: number,
      message?: string,
   }
+
+  export interface ITeams {
+    id?: number,
+    teamName: string,
+  }

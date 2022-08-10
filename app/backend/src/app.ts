@@ -2,6 +2,7 @@ import * as express from 'express';
 import * as cors from 'cors';
 import RouteLogin from './routes/rotaLogin';
 import Error from './Middlewares/erroMiddleware';
+import RouteTeams from './routes/temsRota';
 
 class App {
   public app: express.Express;
@@ -14,8 +15,11 @@ class App {
     // Não remover essa rota
     this.app.get('/', (req, res) => res.json({ ok: true }));
 
+
+    this.app.use(cors());
     this.app.use('/login', RouteLogin);
     this.app.use('/login/validate', RouteLogin);
+    this.app.use('/teams', RouteTeams)
     this.app.use(Error.middlewareError)
   }
 
@@ -31,10 +35,9 @@ class App {
     this.app.use(accessControl);
 
 
-    this.app.use(cors());
-    this.app.use('/login', RouteLogin);
-    this.app.use('/login/validate', RouteLogin);
-    this.app.use(Error.middlewareError);
+    //  this.app.use('/login', RouteLogin);
+     // this.app.use('/login/validate', RouteLogin);
+     // this.app.use(Error.middlewareError);
 
   }
 
