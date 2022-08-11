@@ -19,7 +19,8 @@ class App {
     this.app.use(cors());
     this.app.use('/login', RouteLogin);
     this.app.use('/login/validate', RouteLogin);
-    this.app.use('/teams', RouteTeams)
+    // this.app.use('/teams', RouteTeams);
+    this.app.use( RouteTeams);
     this.app.use(Error.middlewareError)
   }
 
