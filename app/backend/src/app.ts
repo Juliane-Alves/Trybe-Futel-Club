@@ -3,6 +3,7 @@ import * as cors from 'cors';
 import RouteLogin from './routes/rotaLogin';
 import Error from './Middlewares/erroMiddleware';
 import RouteTeams from './routes/temsRota';
+import RotaMatchs from './routes/matchsRota';
 
 class App {
   public app: express.Express;
@@ -21,6 +22,7 @@ class App {
     this.app.use('/login/validate', RouteLogin);
     // this.app.use('/teams', RouteTeams);
     this.app.use( RouteTeams);
+    this.app.use(RotaMatchs);
     this.app.use(Error.middlewareError)
   }
 
