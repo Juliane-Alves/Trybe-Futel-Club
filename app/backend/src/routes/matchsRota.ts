@@ -10,4 +10,8 @@ RotaMatchs.get('/matches', MatchsController.getMatchsAll );
 
 RotaMatchs.post('/matches', validateToken.releaseToken, MatchsController.insertMatchs);
 
+RotaMatchs.patch('/matches/:id/finish', MatchsController.matchsFinish);
+
+RotaMatchs.patch('/matches/:id', MatchsController.matchsUpdate);
+
 export default RotaMatchs;

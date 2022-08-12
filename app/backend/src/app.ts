@@ -21,7 +21,7 @@ class App {
     this.app.use('/login', RouteLogin);
     this.app.use('/login/validate', RouteLogin);
     // this.app.use('/teams', RouteTeams);
-    this.app.use( RouteTeams);
+    this.app.use(RouteTeams);
     this.app.use(RotaMatchs);
     this.app.use(Error.middlewareError)
   }

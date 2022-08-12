@@ -12,7 +12,7 @@ class MatchsController {
          } catch(error) {
             next(error);
          }
-     }
+     };
      
      static insertMatchs = async (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -25,6 +25,30 @@ class MatchsController {
         next(error);
       }
     };
+
+    static  matchsFinish = async (req: Request, res: Response, next: NextFunction) => {
+      const { id } = req.params
+      try {
+      
+         await MatchServices.matchsFinish(Number(id), { inProgress: false });
+        return res.status(200).json({ message: 'Finished' });
+      } catch (error) {
+        console.log(error)
+        next(error)
+      }
+    };
+
+    static  matchsUpdate = async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { id } = req.params
+         await MatchServices.matchsFinish(Number(id), req.body);
+        return res.status(200).json({ message: 'Finished' });
+      } catch (error) {
+        console.log(error)
+        next(error)
+      }
+    };
+
 }
 
 export default MatchsController;

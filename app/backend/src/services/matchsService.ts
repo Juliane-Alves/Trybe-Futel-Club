@@ -12,6 +12,11 @@ const errorNotFound = {
    message: 'There is no team with such id!'
 }
 
+const errorMatchNotFound = {
+  status: 404, 
+  message: 'match not found'
+}
+
 class MatchServices {
     public static async getMatchsAll(): Promise<IMatchs[]> {
 
@@ -36,6 +41,17 @@ class MatchServices {
        const createM = await MatchesModel.create({...data, inProgress: true});
        return createM;
     }
+
+    public static matchsFinish = async (id: number, body: object) => {
+      const getId = await MatchesModel.findByPk(id); 
+
+      if (!getId) throw errorMatchNotFound;
+
+      await MatchesModel.update(
+         body, 
+        { where: { id } }
+      );
+    };
 }
 
 export default MatchServices;
