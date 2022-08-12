@@ -8,8 +8,8 @@ class TokenRelease  {
   public static releaseToken(req: Request, _res: Response, next: NextFunction) {
         try {
 
-         const { authoriation } = req.headers;
-         tokenG.validateJWT(authoriation as string)
+         const { authorization } = req.headers;
+         tokenG.validateJWT(authorization as string)
          return next();
    
         } catch (error) {

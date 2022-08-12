@@ -33,7 +33,7 @@ class MatchServices {
 
        if(!getHomeTeam || !getAwayTeam ) throw errorNotFound;
 
-       const createM = await MatchesModel.create(data);
+       const createM = await MatchesModel.create({...data, inProgress: true});
        return createM;
     }
 }

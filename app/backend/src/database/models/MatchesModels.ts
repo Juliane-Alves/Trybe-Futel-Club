@@ -36,7 +36,8 @@ Matches.init({
   },
   inProgress: {
     type: BOOLEAN,
-    allowNull: false,
+    allowNull: false
+    // defaultValue: true,
   },
 }, {
   underscored: true,

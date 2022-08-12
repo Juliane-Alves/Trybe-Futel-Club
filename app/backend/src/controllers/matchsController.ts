@@ -16,15 +16,8 @@ class MatchsController {
      
      static insertMatchs = async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const { homeTeam, homeTeamGoals, awayTeam, awayTeamGoals } = req.body;
 
-        const newMatch = await MatchServices.insertMatchs({
-          homeTeam,
-          homeTeamGoals,
-          awayTeam,
-          awayTeamGoals,
-          inProgress: true,
-        });
+        const newMatch = await MatchServices.insertMatchs(req.body);
 
         return res.status(201).json(newMatch);
 
