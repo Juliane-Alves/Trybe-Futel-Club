@@ -18,8 +18,9 @@ const errorMatchNotFound = {
 };
 
 class MatchServices {
-  public static async getMatchsAll(): Promise<IMatchs[]> {
+  public static async getMatchsAll(data: object): Promise<IMatchs[]> {
     const getMatches = await MatchesModel.findAll({
+      ...data,
       include: [
         { model: TeamModels, as: 'teamHome', attributes: { exclude: ['id'] } },
         { model: TeamModels, as: 'teamAway', attributes: { exclude: ['id'] } },
@@ -49,6 +50,13 @@ class MatchServices {
       body,
       { where: { id } },
     );
+  };
+
+  public static matchsByTeam = async (id: number, data: string)  => {
+    const getByTeam = await MatchesModel.findAll({where: {[data] : id, inProgress: 0}});
+
+    return getByTeam;
+     
   };
 }
 

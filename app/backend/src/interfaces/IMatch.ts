@@ -1,10 +1,10 @@
 interface IMatchs {
-  id?: number,
+  id?: number | string ,
   homeTeam: number,
   homeTeamGoals: number,
   awayTeam: number,
   awayTeamGoals: number,
-  inProgress?: number,
+  inProgress?: number | boolean,
 }
 
 // Exportação só foi aceita assim,tentando entender  o erro

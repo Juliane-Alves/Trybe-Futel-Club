@@ -1,157 +1,149 @@
 import MatchServices from './matchsService';
 import TeamServices from './teamService';
 import IMatchs from '../interfaces/IMatch';
-import { ILeader, IScores, IFinalScore } from '../interfaces/ILeaderboard';
+import { ILeader, IScores, IFinalScore, IBoard } from '../interfaces/ILeaderboard';
+import { Op } from 'sequelize';
 
 class LeaderService {
 
-  public static getPointsHome(matchs: IMatchs, team: number): IScores {  // pontos iniciais (get HOME)
-    const resultsTeam = { goalsFavor: 0, goalsOwn: 0, result: '' };
-    const { homeTeam, homeTeamGoals, awayTeamGoals } = matchs;
+  static createTotalVictories(matchsId: IMatchs[], mode: string | number) {
+     return  matchsId.reduce((acc, itemMatch ) => {
+       const checkHome = mode === 'homeTeam' || itemMatch.homeTeam === mode;
+       const checkAway = mode === 'awayTeam' || itemMatch.awayTeam === mode
+        if (checkHome && itemMatch.homeTeamGoals > itemMatch.awayTeamGoals) return acc +1;
+        if (checkAway && itemMatch.awayTeamGoals > itemMatch.homeTeamGoals) return acc +1;
+        return acc;
+     }, 0)
+  }
+  static creatDrawns(matchsId: IMatchs[], mode: string | number) {
+    return  matchsId.reduce((acc, itemMatch ) => {
+      const checkHome = mode === 'homeTeam' || itemMatch.homeTeam === mode;
+       const checkAway = mode === 'awayTeam' || itemMatch.awayTeam === mode
+      if ( checkHome && itemMatch.homeTeamGoals === itemMatch.awayTeamGoals) return acc +1;
+      if ( checkAway && itemMatch.awayTeamGoals === itemMatch.homeTeamGoals) return acc +1;
+      return acc;
+   }, 0)
+  }
 
-    if (homeTeam === team) {
-      resultsTeam.goalsFavor = homeTeamGoals;
-      resultsTeam.goalsOwn = awayTeamGoals;
+  static createLosses(matchsId: IMatchs[], mode: string | number) {
+    return  matchsId.reduce((acc, itemMatch) => {
+      const checkHome = mode === 'homeTeam' || itemMatch.homeTeam === mode;
+       const checkAway = mode === 'awayTeam' || itemMatch.awayTeam === mode
+       if (checkHome && itemMatch.homeTeamGoals < itemMatch.awayTeamGoals) return acc +1;
+       if (checkAway && itemMatch.awayTeamGoals < itemMatch.homeTeamGoals) return acc +1;
+       return acc;
+    }, 0)
+ }
 
-    if (homeTeamGoals > awayTeamGoals) 
-      resultsTeam.result = 'victory';
+ static creatGoalsFavor(matchsId: IMatchs[], mode: string | number) {
+  return  matchsId.reduce((acc, itemMatch ) => {
+    const checkHome = mode === 'homeTeam' || itemMatch.homeTeam === mode;
+    const checkAway = mode === 'awayTeam' || itemMatch.awayTeam === mode
+     if (checkHome) return acc + itemMatch.homeTeamGoals;
+     if (checkAway) return acc + itemMatch.awayTeamGoals;
+     return acc;
+  }, 0)
+}
+
+static createGoalsOwn(matchsId: IMatchs[], mode: string | number) {
+  return  matchsId.reduce((acc, itemMatch ) => {
+    const checkHome = mode === 'homeTeam' || itemMatch.homeTeam === mode;
+    const checkAway = mode === 'awayTeam' || itemMatch.awayTeam === mode
+     if (checkHome) return acc + itemMatch.awayTeamGoals;
+     if (checkAway) return acc + itemMatch.homeTeamGoals;
+     return acc;
+  }, 0)
+}
+
+  static pointsScore(matchsId: IMatchs[], mode: string | number) {
+      const totalGames = matchsId.length;
+      const totalVictories = this.createTotalVictories(matchsId, mode);
+      const totalDraws = this.creatDrawns(matchsId, mode);
+      const totalLosses = this.createLosses(matchsId, mode);
+      const goalsFavor = this.creatGoalsFavor(matchsId, mode);
+      const goalsOwn = this.createGoalsOwn(matchsId, mode);
+      const totalPoints = (totalVictories * 3) + totalDraws;
+      const goalsBalance = goalsFavor - goalsOwn;
+      const efficiency = Number((totalPoints / (totalGames * 3)) * 100).toFixed(2);
+
+    return { 
+      totalGames,
+      totalVictories,
+      totalDraws,
+      totalLosses,
+      goalsFavor,
+      goalsOwn,
+      totalPoints,
+      goalsBalance,
+      efficiency,
+    }
+}
+
+  public static matchRanking(leaderBoard: IBoard[]) {  // classificação por ranking
+    return leaderBoard.sort((teamOne: IBoard, teamTwo: IBoard) => {
+      if (teamOne.totalPoints === teamTwo.totalPoints) {
+        return  (teamTwo.totalVictories - teamOne.totalVictories) 
+        || (teamTwo.goalsBalance - teamOne.goalsBalance)
+        || (teamTwo.goalsFavor - teamOne.goalsFavor)
+        || (teamTwo.goalsOwn - teamTwo.goalsOwn)
+    } 
+     return (teamTwo.totalPoints - teamOne.totalPoints)
+  })
+  }
+
+  public static async finishResultScoreHome(mode: string) {  // organização do resultado final dos dados do placar 
+    // const generalData = await this.populatingScore(mode);
     
-    else if (homeTeamGoals < awayTeamGoals) 
-      resultsTeam.result = 'defeat';
-    
-    else if (homeTeamGoals === awayTeamGoals) 
-      resultsTeam.result = 'tie';
-    }
-
-    return { ...resultsTeam };
+    const teamsAll = await TeamServices.getTeams()
+    const createBoard = await Promise.all(teamsAll.map( async (team)=>{
+      const getMatchsById =  await MatchServices.matchsByTeam(Number(team.id), mode);
+      const newBoard = LeaderService.pointsScore(getMatchsById, mode); 
+      return {
+        name: team.teamName,
+        ...newBoard,
+      }
+    }))
+    LeaderService.matchRanking(createBoard);
+    return createBoard;
   }
 
-  public static getAPointsAway(match: IMatchs, team: number): IScores { // get para dados iniciais da rota away (ger AWAy)
-    const resultsTeam = { goalsFavor: 0, goalsOwn: 0, result: '' };
-    const { awayTeam, homeTeamGoals, awayTeamGoals } = match;
+  public static async finishResultScoreAway(mode: string) {
 
-    if (awayTeam === team) {
-      resultsTeam.goalsFavor = awayTeamGoals;
-      resultsTeam.goalsOwn = homeTeamGoals;
-     }
-
-    if (homeTeamGoals < awayTeamGoals) { 
-      resultsTeam.result = 'victory';
-    }
-    if (homeTeamGoals > awayTeamGoals) { 
-      resultsTeam.result = 'defeat';
-    }
-    if (homeTeamGoals === awayTeamGoals){
-      resultsTeam.result = 'tie';
-    }
-
-    return { ...resultsTeam };
+    const teamsAll = await TeamServices.getTeams()
+    const createBoard = await Promise.all(teamsAll.map( async (team)=>{
+      const getMatchsById =  await MatchServices.matchsByTeam(Number(team.id), mode);
+      const newBoard = LeaderService.pointsScore(getMatchsById, mode); 
+      return {
+        name: team.teamName,
+        ...newBoard,
+      }
+    }))
+    LeaderService.matchRanking(createBoard);
+    return createBoard;
   }
 
-  public static getOneScore(match: IMatchs, team: number, mode: string): IScores {  // busca por placar
-    let selectedPoints;
+  public static async finishResultScoreGeneral() {
 
-    if (mode === 'home') selectedPoints = this.getPointsHome(match, team);
-    if (mode === 'away') selectedPoints = this.getAPointsAway(match, team);
-    if (mode === 'total') selectedPoints = this.getFinishScore(match, team);
-
-    return selectedPoints as IScores;
-  }
-
-  public static async populatingScore(mode: string): Promise<ILeader[]> { // populando o placar 
-    const getTeams = await TeamServices.getTeams();
-    const getMatches = await MatchServices.getMatchsAll();
-
-    const teamDataScore = getTeams.map((team) => {
-      const resultsScore = { totalDraws: 0, totalVictories: 0, totalLosses: 0 };
-      const resultsGoalsScore = { goalsFavor: 0, goalsOwn: 0 };
-
-      getMatches.forEach((match) => {
-        if (match.inProgress === 0) {
-          const scoreData = this.getOneScore(match, team.id as number, mode);
-
-          if (scoreData.result === 'victory') resultsScore.totalDraws += 1;
-
-          else if (scoreData.result === 'defeat') resultsScore.totalVictories += 1;
-
-          else if (scoreData.result === 'tie') resultsScore.totalLosses += 1;
-
-          resultsGoalsScore.goalsFavor += scoreData.goalsFavor;
-
-          resultsGoalsScore.goalsOwn += scoreData.goalsOwn;
-        }
+    const teamsAll = await TeamServices.getTeams()
+    const createBoard = await Promise.all(teamsAll.map( async (team)=>{
+      const getMatchsById =  await MatchServices.getMatchsAll({ where: { 
+        [Op.or]: [{ homeTeam: Number(team.id) },{ awayTeam: Number(team.id) }],
+        inProgress: 0,
+      },
       });
-
-      return { name: team.teamName, ...resultsScore, ...resultsGoalsScore };
-    });
-
-    return teamDataScore;
+      const newBoard = LeaderService.pointsScore(getMatchsById, Number(team.id)); 
+      return {
+        name: team.teamName,
+        ...newBoard,
+      }
+    }))
+    LeaderService.matchRanking(createBoard);
+    return createBoard;
   }
 
-  public static matchRanking(leaderBoard: IFinalScore[]) {  // classificação por ranking
-    return leaderBoard.sort((teamOne, teamTwo) => (teamTwo.totalPoints - teamOne.totalPoints)
-    || (teamTwo.totalVictories - teamOne.totalVictories)
-    || (teamTwo.goalsBalance - teamOne.goalsBalance)
-    || (teamTwo.goalsFavor - teamOne.goalsFavor)
-    || (teamTwo.goalsOwn - teamTwo.goalsOwn));
-  }
-
-  public static async finishResultScore(mode: string) {  // organização do resultado final dos dados do placar 
-    const generalData = await this.populatingScore(mode);
-
-    const pointsScore = generalData.map((team) => {
-      const organizeInfo = { 
-        name: team.name,
-        totalPoints: ((team.totalVictories * 3) + (team.totalDraws * 1)),
-        totalGames: (team.totalVictories + team.totalDraws + team.totalLosses),
-        totalVictories: team.totalVictories,
-        totalDraws: team.totalDraws,
-        totalLosses: team.totalLosses,
-        goalsFavor: team.goalsFavor,
-        goalsOwn: team.goalsOwn,
-        goalsBalance: (team.goalsFavor - team.goalsOwn),
-        efficiency: 0,
-      };
-      organizeInfo.efficiency = Number(((organizeInfo.totalPoints / (organizeInfo.totalGames * 3)) * 100).toFixed(2));
-      return organizeInfo;
-    });
-    return this.matchRanking(pointsScore);
-  }
-
-  public static getFinishScore(match: IMatchs, team: number): IScores { // get final da seção de partidas (Get totais)
-    const resultsTeam = { goalsFavor: 0, goalsOwn: 0, matchResult: '' };
-    const { homeTeam, awayTeam, homeTeamGoals, awayTeamGoals } = match;
-
-    if (homeTeam === team) {
-      resultsTeam.goalsFavor = homeTeamGoals;
-      resultsTeam.goalsOwn = awayTeamGoals;
-    }
-    if (homeTeamGoals > awayTeamGoals) { 
-      resultsTeam.matchResult = 'victory';
-    }
-    if (homeTeamGoals < awayTeamGoals) { 
-      resultsTeam.matchResult = 'defeat';
-    }
-    if (homeTeamGoals === awayTeamGoals) {
-      resultsTeam.matchResult = 'tie';
-    }
-
-    if (awayTeam === team) {
-      resultsTeam.goalsFavor = awayTeamGoals;
-      resultsTeam.goalsOwn = homeTeamGoals;
-    }
-    if (homeTeamGoals < awayTeamGoals) {
-       resultsTeam.matchResult = 'victory';
-    }
-    if (homeTeamGoals > awayTeamGoals){
-      resultsTeam.matchResult = 'defeat';
-    } 
-    if (homeTeamGoals === awayTeamGoals){
-      resultsTeam.matchResult = 'tie';
-    } 
-
-    return { ...resultsTeam };
-  }
 }
 
 export default LeaderService;
+
+
+

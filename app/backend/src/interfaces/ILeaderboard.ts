@@ -18,7 +18,7 @@ export interface IScores {
 }
 
 export interface IFinalScore {
-  name: string,
+  name?: string,
   totalPoints: number,
   totalGames: number,
   totalVictories: number,
@@ -29,3 +29,17 @@ export interface IFinalScore {
   goalsBalance: number,
   efficiency: number,
 }
+
+
+export interface IBoard {
+  totalPoints: number,
+  totalGames: number,
+  totalVictories: number,
+  totalDraws: number,
+  totalLosses: number,
+  goalsFavor: number,
+  goalsOwn: number,
+  goalsBalance: number,
+  efficiency: string,
+}
+
