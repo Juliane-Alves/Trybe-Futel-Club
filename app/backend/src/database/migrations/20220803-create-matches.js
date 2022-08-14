@@ -42,9 +42,9 @@ module.exports = {
       },
 
       in_progress: {
-        type: Sequelize.BOOLEAN,
+        type: Sequelize.INTEGER,
         allowNull: false,
-        // defaultValue: true,
+        defaultValue: 1,
       }
     });
   },

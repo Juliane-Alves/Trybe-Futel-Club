@@ -4,6 +4,7 @@ import RouteLogin from './routes/rotaLogin';
 import Error from './Middlewares/erroMiddleware';
 import RouteTeams from './routes/temsRota';
 import RotaMatchs from './routes/matchsRota';
+import RouteLeader from './routes/leaderRota';
 
 class App {
   public app: express.Express;
@@ -23,6 +24,7 @@ class App {
     // this.app.use('/teams', RouteTeams);
     this.app.use(RouteTeams);
     this.app.use(RotaMatchs);
+    this.app.use(RouteLeader)
     this.app.use(Error.middlewareError)
   }
 

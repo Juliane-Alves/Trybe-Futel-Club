@@ -4,54 +4,52 @@ import IMatchs from '../interfaces/IMatch';
 
 const errorNotCreat = {
   status: 401,
-  message: 'It is not possible to create a match with two equal teams' 
+  message: 'It is not possible to create a match with two equal teams',
 };
 
 const errorNotFound = {
-   status: 404,
-   message: 'There is no team with such id!'
-}
+  status: 404,
+  message: 'There is no team with such id!',
+};
 
 const errorMatchNotFound = {
-  status: 404, 
-  message: 'match not found'
-}
+  status: 404,
+  message: 'match not found',
+};
 
 class MatchServices {
-    public static async getMatchsAll(): Promise<IMatchs[]> {
+  public static async getMatchsAll(): Promise<IMatchs[]> {
+    const getMatches = await MatchesModel.findAll({
+      include: [
+        { model: TeamModels, as: 'teamHome', attributes: { exclude: ['id'] } },
+        { model: TeamModels, as: 'teamAway', attributes: { exclude: ['id'] } },
+      ],
+    });
+    return getMatches as unknown as IMatchs[]; // erro devido ao tipo do in progress
+  }
 
-        const getMatches = await MatchesModel.findAll({
-            include: [
-              { model: TeamModels, as: 'teamHome', attributes: { exclude: ['id'] } },
-              { model: TeamModels, as: 'teamAway', attributes: { exclude: ['id'] } },
-            ],
-          });  
-        return getMatches;
-    }
+  public static async insertMatchs(data: IMatchs) {
+    if (data.awayTeam === data.homeTeam) throw errorNotCreat;
 
+    const getHomeTeam = await MatchesModel.findByPk(data.homeTeam);
+    const getAwayTeam = await MatchesModel.findByPk(data.awayTeam);
 
-    public static async insertMatchs(data: IMatchs) {
-       if (data.awayTeam === data.homeTeam) throw errorNotCreat;
+    if (!getHomeTeam || !getAwayTeam) throw errorNotFound;
 
-       const getHomeTeam = await MatchesModel.findByPk(data.homeTeam);
-       const getAwayTeam = await MatchesModel.findByPk(data.awayTeam);
+    const createM = await MatchesModel.create({ ...data, inProgress: 1 });
+    return createM;
+  }
 
-       if(!getHomeTeam || !getAwayTeam ) throw errorNotFound;
+  public static matchsFinish = async (id: number, body: object) => {
+    const getId = await MatchesModel.findByPk(id);
 
-       const createM = await MatchesModel.create({...data, inProgress: true});
-       return createM;
-    }
+    if (!getId) throw errorMatchNotFound;
 
-    public static matchsFinish = async (id: number, body: object) => {
-      const getId = await MatchesModel.findByPk(id); 
-
-      if (!getId) throw errorMatchNotFound;
-
-      await MatchesModel.update(
-         body, 
-        { where: { id } }
-      );
-    };
+    await MatchesModel.update(
+      body,
+      { where: { id } },
+    );
+  };
 }
 
 export default MatchServices;
