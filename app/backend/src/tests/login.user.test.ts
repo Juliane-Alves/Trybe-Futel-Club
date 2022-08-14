@@ -1,7 +1,7 @@
 import * as sinon from 'sinon';
 import * as chai from 'chai';
 import * as bcrypt from 'bcryptjs';
-
+// comentario test
 // @ts-ignore
 import chaiHttp = require('chai-http');
 
