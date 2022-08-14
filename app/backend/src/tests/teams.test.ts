@@ -22,9 +22,9 @@ describe('Verificando a rota /item', () => {
     });
 
     it('Verifica se retorna um array de times', async () => {
-      const response = await chai.request(app).get('/teams');;
-      expect(response.status).to.be.equal(200);
-      expect(response.body[0]).to.have.keys('id','teamName');
+      const responseData = await chai.request(app).get('/teams');;
+      expect(responseData.status).to.be.equal(200);
+      expect(responseData.body[0]).to.have.keys('id','teamName');
     });
   });
 
