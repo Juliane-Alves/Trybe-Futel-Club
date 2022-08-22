@@ -1,6 +1,7 @@
 import * as sinon from 'sinon';
 import * as chai from 'chai';
 import * as bcrypt from 'bcryptjs';
+import { before, after } from 'mocha';
 // comentario test
 // @ts-ignore
 import chaiHttp = require('chai-http');
@@ -8,6 +9,7 @@ import chaiHttp = require('chai-http');
 import { app } from '../app';
 
 import User from '../database/models/UsersModel';
+import { isMapIterator } from 'util/types';
 
 chai.use(chaiHttp);
 const { expect } = chai;
@@ -56,12 +58,3 @@ describe('Verifica a rota post Login', () => {
     });
   })
 });
-
-function before(arg0: () => void) {
-  throw new Error('Function not implemented.');
-}
-
-
-function after(arg0: () => void) {
-  throw new Error('Function not implemented.');
-}
